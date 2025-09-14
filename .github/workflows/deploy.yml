@@ -1,0 +1,27 @@
+name: CI/CD Deploy
+
+# Trigger workflow saat ada push ke branch master
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Deploy ke VPS via SSH
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.VPS_HOST }}        # IP VPS
+          username: ${{ secrets.VPS_USER }}    # user di VPS
+          key: ${{ secrets.VPS_KEY }}          # private key SSH
+          script: |
+            cd /home/myapp                      # folder project di VPS
+            git pull origin master              # update kode
+            docker compose up -d --build        # build & restart container
